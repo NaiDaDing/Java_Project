@@ -112,7 +112,7 @@ public class Register {
 		Connection conn = null;
 		PreparedStatement stat = null;
 		ResultSet result = null;
-		String checkQuery = "select course_id from course where course_id = ?";
+		String checkQuery = "select course_id from enroll where student_id = ? and course_id = ?";
 		String update = "insert into enroll values(?,?,0)";
 		String test = "";
 		Student student = findStudent(studentID);
@@ -120,13 +120,14 @@ public class Register {
 		try {
 			conn = DriverManager.getConnection(url);
 			stat = conn.prepareStatement(checkQuery);
-			stat.setString(1, course.getCourseID());
+			stat.setString(1, student.getStudentID());
+			stat.setString(2, course.getCourseID());
 			result = stat.executeQuery();
 			if(student!=null && course!=null) {
 				while(result.next()) {
 					test += result.getString(1);
 				}
-				if(student.getCurrentCredits()+course.getCredits()<=student.getMaxCredits() && test!="") {
+				if(student.getCurrentCredits()+course.getCredits()<=student.getMaxCredits() && !test.equals(courseID)) {
 					student.setCurrentCredits(student.getCurrentCredits()+course.getCredits());
 					stat = conn.prepareStatement(update);
 					stat.setString(1, studentID);
@@ -150,7 +151,7 @@ public class Register {
 		Connection conn = null;
 		PreparedStatement stat = null;
 		ResultSet result = null;
-		String checkQuery = "select course_id from course where course_id = ?";
+		String checkQuery = "select course_id from enroll where student_id = ? and course_id = ?";
 		String drop = "delete from enroll where course_id = ?";
 		String test = "";
 		Student student = findStudent(studentID);
@@ -158,13 +159,14 @@ public class Register {
 		try {
 			conn = DriverManager.getConnection(url);
 			stat = conn.prepareStatement(checkQuery);
-			stat.setString(1, course.getCourseID());
+			stat.setString(1, student.getStudentID());
+			stat.setString(2, course.getCourseID());
 			result = stat.executeQuery();
 			if(student!=null && course!=null) {
 				while(result.next()) {
 					test += result.getString(1);
 				}
-				if(test!="") {
+				if(test.equals(courseID)) {
 					student.setCurrentCredits(student.getCurrentCredits()-course.getCredits());
 					stat = conn.prepareStatement(drop);
 					stat.setString(1, courseID);
